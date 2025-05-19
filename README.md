@@ -7,7 +7,7 @@ in src/:
 - wxdata_ingest.py: code for ingesting GHCN data in wx_data subdirectory and uploading it to the 'station_data' data table in the 'wxdata' database
 - wxstats_ingest.py: code for calculating statistics from the data in the station_data data table and uploading to the 'weather_stats' data table
 
-in api/:
+in ./:
 - api.py: code for a simple REST API using Flask to serve weather data from 'station_data' and 'weather_stats' (running locally)
 
 Written discussion in answers/: 
