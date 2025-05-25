@@ -1,12 +1,12 @@
 import psycopg2
 from psycopg2 import OperationalError, errorcodes
 
-# Database connection parameters. 
+# Database connection parameters
 dbname = "wxdata"
 dbuser = "postgres"
 dbpassword = "test"
-dbhost = "localhost"  
-dbport = "5432"  
+dbhost = "localhost"
+dbport = "5432"
 
 # PostGreSQL utilities
 
@@ -25,12 +25,8 @@ def create_table(conn, create_table_sql, logger):
         conn.commit()
         cur.close()
     except OperationalError as e:
-        if e.pgcode == errorcodes.DUPLICATE_TABLE:
-            return 0
-            #print(f"Table '{table_name}' already exists.")
-        else:
-            logger.exception(f"Error creating table: {e}")
-            conn.rollback()
+        logger.exception(f"Error creating table: {e}")
+        conn.rollback()
     except Exception as e:
         logger.exception(f"An unexpected error occurred: {e}")
         conn.rollback()
@@ -89,7 +85,6 @@ def init_table(table_sql, logger):
     else:
         logger.exceptions("Failed to connect to the database.")
 
-    return
 
 def execute_insert_db(conn, logger, sqlcommand, data=None):
     """
@@ -103,7 +98,7 @@ def execute_insert_db(conn, logger, sqlcommand, data=None):
     """
     cursor = conn.cursor()
     try:
-        if (data):
+        if data:
             cursor.execute(sqlcommand, data)
         else:
             cursor.execute(sqlcommand)
@@ -114,7 +109,6 @@ def execute_insert_db(conn, logger, sqlcommand, data=None):
     finally:
         cursor.close()
 
-    return
 
 def execute_select_db(conn, logger, sqlcommand, data=None):
     """
@@ -130,7 +124,7 @@ def execute_select_db(conn, logger, sqlcommand, data=None):
     """
     cursor = conn.cursor()
     try:
-        if (data):
+        if data:
             cursor.execute(sqlcommand, data)
         else:
             cursor.execute(sqlcommand)
@@ -138,7 +132,6 @@ def execute_select_db(conn, logger, sqlcommand, data=None):
     except psycopg2.Error as e:
         conn.rollback()
         logger.exception(f"Error inserting or updating data: {e}")
+        return None
     finally:
         cursor.close()
-
-    return

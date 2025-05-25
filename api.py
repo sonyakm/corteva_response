@@ -1,8 +1,9 @@
+from datetime import datetime
+
 from flask import Flask, jsonify, request
 from flasgger import Swagger
 
 import psycopg2
-from datetime import datetime
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -22,7 +23,11 @@ def connect_db():
     """Connects to the PostgreSQL database."""
     conn = None
     try:
-        conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASSWORD, port=DB_PORT)
+        conn = psycopg2.connect(host=DB_HOST,
+                                database=DB_NAME,
+                                user=DB_USER,
+                                password=DB_PASSWORD,
+                                port=DB_PORT)
     except psycopg2.Error as e:
         print(f"Error connecting to database: {e}")
     return conn
@@ -36,8 +41,7 @@ def paginate(cursor, page, per_page):
     """Paginates the cursor results."""
     page = int(request.args.get('page', page))
     per_page = int(request.args.get('per_page', per_page))
-    if page < 1:
-        page = 1
+    page = max(page, 1)
     start = (page - 1) * per_page
     return cursor, page, per_page, start, per_page
 

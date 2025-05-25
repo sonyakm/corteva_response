@@ -1,27 +1,25 @@
 #!/usr/bin/env python
-#PostgreSQL 
-import psycopg2
-from psycopg2 import OperationalError, errorcodes
-from db_util import connect_to_db, create_table, init_table, execute_insert_db, execute_select_db #local library
-
-#general use libraries
-import numpy as np
 
 #logging
 import logging
 
+#PostgreSQL local library
+from db_util import connect_to_db, init_table, execute_insert_db, execute_select_db
+
 maindir = '../'
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format = '%(asctime)s - %(message)s', filename=maindir + 'wxstats.log')
+logging.basicConfig(level=logging.INFO,
+                    format = '%(asctime)s - %(message)s',
+                    filename=maindir + 'wxstats.log')
 
 
-# Database connection parameters. 
+# Database connection parameters
 dbname = "wxdata"
 dbuser = "postgres"
 dbpassword = "test"
-dbhost = "localhost"  
-dbport = "5432"  
+dbhost = "localhost"
+dbport = "5432"
 
 def init_stats_table(logger):
     """
@@ -42,9 +40,6 @@ def init_stats_table(logger):
     """
 
     init_table(create_table_sql, logger)
-    
-    return 
-
 
 def get_stations(logger):
     """
@@ -63,7 +58,7 @@ def get_stations(logger):
         conn.close()
         return stations
 
-    return
+    return None
 
 def get_min_max_year(station, logger):
     """
@@ -84,8 +79,8 @@ def get_min_max_year(station, logger):
         conn.close()
         return res[0][0],res[0][1]
 
-    return
-    
+    return None
+
 
 def get_stats(station, year, logger):
     """
@@ -109,8 +104,7 @@ def get_stats(station, year, logger):
         conn.close()
         return res[0]
 
-    return
-    
+    return None
 
 def upsert_stats_data(conn, data, logger):
     """
@@ -129,7 +123,7 @@ def upsert_stats_data(conn, data, logger):
             nobs_precip: number of precip obs included
 
     """
-    
+
     sql = """
     INSERT INTO weather_stats 
             (station_id, 
@@ -149,15 +143,7 @@ def upsert_stats_data(conn, data, logger):
     """
     execute_insert_db(conn, logger, sql, data=data)
 
-    return
-
-
-if (__name__ == "__main__"):
-
-    #create stats table if it does not exist
-    init_stats_table(logger)
-    logger.info('Started stats')
-    
+if __name__ == "__main__":
     """
     for each station:
     - retrieve min/max year
@@ -165,6 +151,9 @@ if (__name__ == "__main__"):
         - calculate avg maxt, mint, sum precip, nobs_temp, nobs_precip
         - upsert to weather stats db
     """
+    #create stats table if it does not exist
+    init_stats_table(logger)
+    logger.info('Started stats')
     for stn in get_stations(logger):
         miny, maxy = get_min_max_year(stn, logger)
         if miny is not None:
@@ -174,11 +163,9 @@ if (__name__ == "__main__"):
                     psum = float(psum)/10. #convert to cm
                 conn = connect_to_db(logger)
                 if conn is not None:
-                    upsert_stats_data(conn,(stn, year, avgmaxt, avgmint, psum, nobst, nobsp), logger)
+                    upsert_stats_data(conn,
+                                      (stn, year, avgmaxt, avgmint, psum, nobst, nobsp),
+                                      logger)
                 conn.close()
-                
+
     logger.info('Ended stats')
-
-
-
-
